@@ -6,20 +6,22 @@ close all
 
 
 steps = 100;
-p = 5;
+p = 3;
 Winital = .00000001; %
 new_rows = 28;
 new_columns = 28;
 
-tot_num_img = 15665;
+tot_num_img = 15680;
 num_train_imgs = 15655;
 numb_test_imgs = tot_num_img - num_train_imgs;
 
 %enter training data
 %[trainImg, trainLabel] = mnist_parse('train-images.idx3-ubyte','train-labels.idx1-ubyte');
 training_folder = './worm_images_scott';
+test_folder = './test_worm_images';
 trainImg = resize_multiple_imgs(new_rows, new_columns, training_folder,0);
 all_Labels = load('target.mat');
+all_Labels.t = [all_Labels.t 0];
 trainLabel = all_Labels.t(1:num_train_imgs);
 
 
@@ -29,7 +31,7 @@ W = Winital*ones(1+sz^2,K); %intalize
 %reshaping into vectors
 %premute switches the rows and columns pretty much transpose
 
-phi = cast([ones(1,N); reshape(permute(trainImg,[2 1 3]),[sz^2 N])],'double')./25600;
+phi = cast([ones(1,N); reshape(permute(trainImg,[2 1 3]),[sz^2 N])],'double')./256000;
 
 y = zeros(N,K);
 t = zeros(N,K);
@@ -60,11 +62,11 @@ end
 
 %testing data
 %[testImg, testLabel] = mnist_parse('t10k-images.idx3-ubyte','t10k-labels.idx1-ubyte');
-testImg = resize_multiple_imgs(new_rows, new_columns, training_folder,0);
+testImg = resize_multiple_imgs(new_rows, new_columns, test_folder,0);
 testLabel =  all_Labels.t(num_train_imgs:tot_num_img);
 N = numb_test_imgs;
 
-phi = cast([ones(1,N); reshape(permute(testImg,[2 1 3]),[sz^2 N])],'double')./25600;
+phi = cast([ones(1,N); reshape(permute(testImg,[2 1 3]),[sz^2 N])],'double')./256000;
 
 result = -1*ones(numel(testLabel),1);
 for n = 1:N
@@ -127,7 +129,7 @@ end
 function y = resize_multiple_imgs(new_rows, new_columns, folder_name,save) %resizes all images inside new folder named "resized_folder" to desired dimensions. returns resized images as vectors
 mkdir resized_folder
 filelist = dir(folder_name);
-offset = 2; %subtract foulder name and location and .mat file
+offset = 2; %subtract foulder name and location 
 len = length(filelist);
 for i=offset : len
   filename = filelist(i);
